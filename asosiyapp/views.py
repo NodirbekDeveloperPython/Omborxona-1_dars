@@ -38,9 +38,9 @@ class ProductDeleteView(View):
         if request.user.is_authenticated:
             hozirgi_sotuvchi = Sotuvchi.objects.filter(user=request.user)[0]
             m = Mahsulot.objects.get(id=pk)
-            if m.sotuvchi == hozirgi_sotuvchi:
+            if m.sotuvchi == hozirgi_sotuvchi and request.user.is_staff:
                 m.delete()
-                return redirect('/bolimlar/mahsulotlar/')
+            return redirect('mahsulotlar')
         return redirect('login')
 
 
@@ -66,12 +66,32 @@ class MijozlarView(View):
 class ClientDeleteView(View):
     def get(self,request, son):
         if request.user.is_authenticated:
-            if Sotuvchi.objects.get(user=request.user).user.is__staff and Sotuvchi.objects.get(user=request.user) == Sotuvchi.objects.get(id=son):
-                Mijoz.objects.get(id=son).delete()
-            return redirect('/bolimlar/clientlar/')
+            hozirgi_sotuvchi = Sotuvchi.objects.filter(user=request.user)[0]
+            client = Mijoz.objects.get(id=son)
+            if request.user.is_staff and client.sotuvchi == hozirgi_sotuvchi:
+                client.delete()
+            return redirect('mijozlar')
         return redirect('login')
 
 
-class ProductUpdateView(View):
+class ClientUpdateView(View):
     def get(self, request,son):
-        return render(request, 'product_update.html')
+
+        data = {
+            'client': Mijoz.objects.get(id=son)
+        }
+        return render(request, 'client_update.html',data)
+
+    def post(self, request, son):
+        if request.user.is_authenticated:
+            hozirgi_sotuvchi = Sotuvchi.objects.filter(user=request.user)[0]
+            if request.user.is_staff and Mijoz.objects.get(id=son).sotuvchi == hozirgi_sotuvchi:
+                Mijoz.objects.filter(id=son).update(
+                    ism = request.POST.get('client_name'),
+                    nom = request.POST.get('client_shop'),
+                    manzil = request.POST.get('client_address'),
+                    tel = request.POST.get('client_phone'),
+                    qarz = request.POST.get('client_qarz'),
+                    sotuvchi = hozirgi_sotuvchi,
+                )
+        return redirect('mijozlar')
