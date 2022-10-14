@@ -95,3 +95,11 @@ class ClientUpdateView(View):
                     sotuvchi = hozirgi_sotuvchi,
                 )
         return redirect('mijozlar')
+
+
+class ProductUpdateView(View):
+    def get(self,request, son):
+        data = {
+            'mahsulot': Mahsulot.objects.get(id=son)
+        }
+        return render(request, 'product_update.html', data)

@@ -161,7 +161,7 @@
                             {% if request.user.is_staff %}
                             <td><a href="/bolimlar/pr_delete/{{mahsulot.id}}/"><button type="submit" class="btn btn-danger" data-toggle="modal">O'chirish</button></a></td>
                             {% endif %}
-                            <td><a href="/product_update/{{product.id}}"><button type="submit" class="btn btn-danger" data-toggle="modal">Tahrirlash</button></a></td>
+                            <td><a href="/bolimlar/product_update/{{mahsulot.id}}/"><button type="submit" class="btn btn-danger" data-toggle="modal">Tahrirlash</button></a></td>
                         </tr>
                     {% endfor %}
                     </tbody>
