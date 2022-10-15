@@ -13,8 +13,13 @@ class BolimlarView(View):
 
 class MahsulotlarView(View):
     def get(self, request):
+        products = Mahsulot.objects.filter(sotuvchi__user=request.user)
+        qidiruv_sozi = request.GET.get('soz')
+        if qidiruv_sozi is not None:
+            products = products.filter(mahsulot__nom__contains=qidiruv_sozi) | products.filter(mahsulot__brend__contains=
+            qidiruv_sozi) | products.filter(mahsulot__sotuvchi__contains=qidiruv_sozi)
         data = {
-            'mahsulotlar': Mahsulot.objects.filter(sotuvchi__user=request.user)
+            'mahsulotlar': products
         }
         return render(request, 'products.html', data)
 
@@ -46,8 +51,13 @@ class ProductDeleteView(View):
 
 class MijozlarView(View):
     def get(self, request):
+        mijozlar = Mijoz.objects.filter(sotuvchi__user=request.user)
+        qidiruv_sozi = request.GET.get('soz')
+        if qidiruv_sozi is not None:
+            mijozlar = mijozlar.filter(mijoz__ism__contains=qidiruv_sozi) | mijozlar.filter(mijoz__nom__contains=
+            qidiruv_sozi) | mijozlar.filter(mijoz__manzil__contains=qidiruv_sozi) | mijozlar.filter(mijoz__tel__contains=qidiruv_sozi)
         data = {
-            'mijozlar': Mijoz.objects.filter(sotuvchi__user=request.user)
+            'mijozlar': mijozlar
         }
         return render(request, 'clients.html',data)
 
@@ -98,8 +108,23 @@ class ClientUpdateView(View):
 
 
 class ProductUpdateView(View):
-    def get(self,request, son):
-        data = {
-            'mahsulot': Mahsulot.objects.get(id=son)
-        }
-        return render(request, 'product_update.html', data)
+    def get(self, request, son):
+        hozirgi_ombor = Sotuvchi.objects.filter(user=request.user)
+        product = Mahsulot.objects.get(id=son)
+        if request.user.is_authenticated and product.sotuvchi in hozirgi_ombor:
+            data = {
+                'mahsulot': Mahsulot.objects.get(id=son)
+            }
+            return render(request, 'product_update.html', data)
+        else:
+            return redirect('/bolimlar/mahsulotlar/')
+
+    def post(self,request,son):
+        Mahsulot.objects.filter(id=son).update(
+            nom = request.POST.get('name'),
+            brend = request.POST.get('brand_name'),
+            narx = request.POST.get('price'),
+            miqdor = request.POST.get('miqdor'),
+            olchov = request.POST.get('amout'),
+        )
+        return redirect('/bolimlar/mahsulotlar/')
